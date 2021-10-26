@@ -6,6 +6,8 @@ services:
     build: oidc-provider/
     ports:
       - "9000:9000"
+    extra_hosts:
+      - "localhost:172.17.0.1"
 
   rucio-db:
     image: postgres:11
@@ -26,6 +28,8 @@ services:
       - oidc-provider
     environment:
       - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
+    extra_hosts:
+      - "localhost:172.17.0.1"
 
   rucio-ui:
     build:
@@ -45,6 +49,8 @@ services:
       - RUCIO_PROXY=rucio:8080
       - RUCIO_AUTH_PROXY_SCHEME=http
       - RUCIO_AUTH_PROXY=rucio:8080
+    extra_hosts:
+      - "localhost:172.17.0.1"
 
   rucio-db-init:
     image: rucio/rucio-init:release-${RUCIO_VERSION_DB_INIT}
