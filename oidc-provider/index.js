@@ -16,8 +16,8 @@ const configuration = {
             client_secret: "secret_01",
             registration_access_token: "rat_01",
             redirect_uris: [
-                "http://rucio:8080/auth/oidc_token",
-                "http://rucio:8080/auth/oidc_code",
+                "http://localhost:8080/auth/oidc_token",
+                "http://localhost:8080/auth/oidc_code",
             ],
             client_name: "rucio-auth-client",
             token_endpoint_auth_method: "client_secret_basic",
@@ -39,8 +39,8 @@ const configuration = {
             client_secret: "secret_02",
             registration_access_token: "rat_02",
             redirect_uris: [
-                "http://rucio:8080/auth/oidc_token",
-                "http://rucio:8080/auth/oidc_code",
+                "http://localhost:8080/auth/oidc_token",
+                "http://localhost:8080/auth/oidc_code",
             ],
             client_name: "rucio-admin-client",
             token_endpoint_auth_method: "client_secret_basic",
@@ -60,7 +60,7 @@ const configuration = {
     },
 };
 
-const oidc = new Provider('http://oidc-provider:9000', configuration);
+const oidc = new Provider('http://localhost:9000', configuration);
 
 app.use("/oidc", oidc.callback());
 
