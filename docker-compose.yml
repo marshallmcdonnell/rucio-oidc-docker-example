@@ -27,6 +27,7 @@ services:
     depends_on:
       - oidc-provider
     environment:
+      - RUCIO_SERVER_TYPE=all
       - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
     extra_hosts:
       - "localhost:172.17.0.1"
