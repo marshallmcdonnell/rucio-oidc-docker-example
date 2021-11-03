@@ -1,0 +1,43 @@
+#!/bin/bash
+
+function usage {
+  echo "usage: rucio-client-docker RUCIO_SERVER_ADDRESS"
+  echo ""
+  echo "positional arguments:"
+  echo "  RUCIO_SERVER_ADDRESS   Addresss of cluster (Example: http://localhost:8080)"
+  echo ""
+  echo "optional environmental arguments"
+  echo ""
+  echo "  RUCIO_CFG_AUTH_HOST    Address to the Rucio authentication server (default: same as host)"
+  echo "  RUCIO_CFG_ACCOUNT      Rucio account that map to credentials (default: root)"
+}
+
+if [ $# -ne 1 ]
+then
+  usage
+  exit 1
+fi
+
+# Positional argument
+RUCIO_CFG_RUCIO_HOST=$1
+
+# Client container tag
+#  - https://hub.docker.com/r/rucio/rucio-clients/tags
+RUCIO_TAG="release-1.26.0"
+
+# (Optional) environmental arguments
+RUCIO_CFG_AUTH_HOST=${RUCIO_CFG_AUTH_HOST:-${RUCIO_CFG_RUCIO_HOST}}
+RUCIO_CFG_ACCOUNT=${RUCIO_CFG_ACCOUNT:-root}
+
+# Launch docker container for Rucio client
+docker container stop rucio-client
+docker container rm -f rucio-client
+docker run \
+  --net=host \
+  -e RUCIO_CFG_RUCIO_HOST=${RUCIO_CFG_RUCIO_HOST} \
+  -e RUCIO_CFG_AUTH_HOST=${RUCIO_CFG_AUTH_HOST} \
+  -e RUCIO_CFG_AUTH_TYPE=oidc \
+  -e RUCIO_CFG_ACCOUNT=${RUCIO_CFG_ACCOUNT} \
+  --name=rucio-client \
+  -it rucio/rucio-clients:${RUCIO_TAG}
+
