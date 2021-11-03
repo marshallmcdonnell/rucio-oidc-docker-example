@@ -9,6 +9,11 @@ app.use(express.static(__dirname + '/public'))
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+//const rucioAuthScopes = "address fts phone openid profile offline_access rucio email wlcg wlcg.groups fts:submit-transfer";
+//const rucioAdminScopes = "address scim:read phone email wlcg profile fts:submit-transfer rucio fts";
+const rucioAuthScopes = "openid profile rucio";
+const rucioAdminScopes = "scim:read profile rucio";
+
 const rucioAuthClient = {
     client_id: "client_01",
     client_secret: "secret_01",
@@ -19,7 +24,7 @@ const rucioAuthClient = {
     ],
     client_name: "rucio-auth-client",
     token_endpoint_auth_method: "client_secret_basic",
-    scope: "address fts phone openid profile offline_access rucio email wlcg wlcg.groups fts:submit-transfer",
+    scope: rucioAuthScopes,
     grant_types: [
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:token-exchange",
@@ -44,7 +49,7 @@ const rucioAdminClient = {
     ],
     client_name: "rucio-admin-client",
     token_endpoint_auth_method: "client_secret_basic",
-    scope: "address scim:read phone email wlcg profile fts:submit-transfer rucio fts",
+    scope: rucioAdminScopes,
     grant_types: [
         "client_credentials"
     ],
@@ -97,8 +102,6 @@ oidc.registerGrantType(
       const { AccessToken } = provider;
       const scopeParams = ctx.oidc.params.scope;
       const scopes = [...new Set(scopeParams.split(' '))];
-
-      //checkScope(ctx);
 
       const subject_token_type = ctx.oidc.params.subject_token_type;
       if (!subject_token_type) {
