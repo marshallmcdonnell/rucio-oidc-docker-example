@@ -1,0 +1,20 @@
+--- /current/rucio/core/oidc.py	2021-11-01 14:14:24.439824847 -0400
++++ /changes/rucio/core/oidc.py	2021-11-05 09:25:27.033858241 -0400
+@@ -314,7 +314,7 @@
+         # URL is returned instead of the direct URL pointing to the IdP.
+         if not auto:
+             auth_server = urlparse(redirect_url)
+-            auth_url = build_url('https://' + auth_server.netloc,
++            auth_url = build_url('http://' + auth_server.netloc,
+                                  path='auth/oidc_redirect', params=access_msg)
+ 
+         record_counter(counters='IdP_authentication.request')
+@@ -351,7 +351,7 @@
+             raise CannotAuthenticate("User related Rucio OIDC session could not keep "
+                                      + "track of responses from outstanding requests.")  # NOQA: W503
+         req_url = urlparse(oauth_req_params.redirect_msg)
+-        issuer = 'https://' + req_url.netloc + '/'
++        issuer = 'http://' + req_url.netloc + '/'
+         req_params = parse_qs(req_url.query)
+         for key in req_params:
+             req_params[key] = val_to_space_sep_str(req_params[key])
