@@ -61,5 +61,5 @@ services:
       - rucio
     environment:
       - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
-      - RUCIO_CFG_BOOTSTRAP_USERPASS_IDENTITY=rse
-      - RUCIO_CFG_BOOTSTRAP_USERPASS_PWD=secret
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_IDENTITY=${RUCIO_USERPASS_IDENTITY}
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_PWD=${RUCIO_USERPASS_PWD}
