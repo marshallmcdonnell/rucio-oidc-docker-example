@@ -22,6 +22,7 @@ services:
     ports:
       - "8080:80"
     volumes:
+        - ./rucio-server/patch:/patch
         - ./rucio-server/rucio.cfg:/opt/rucio/etc/rucio.cfg
         - ./rucio-server/idpsecrets.json:/opt/rucio/etc/idpsecrets.json
     depends_on:
