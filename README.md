@@ -25,9 +25,9 @@ docker-compose build
 docker-compose up
 ```
 
-Provider is listening on http://localhost:9000
-Rucio server is listening on http://localhost:8080
-Rucio UI is listening on http://localhost:8443
+* OIDC provider is listening on http://localhost:9000
+* Rucio server is listening on http://localhost:8080
+* Rucio UI is listening on http://localhost:8443
 
 ### Add the OIDC identity to the admin account to finalize OIDC setup
 
