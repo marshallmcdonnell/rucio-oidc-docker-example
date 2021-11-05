@@ -29,6 +29,12 @@ docker-compose up
 * Rucio server is listening on http://localhost:8080
 * Rucio UI is listening on http://localhost:8443
 
+If you also would like to have xrootd RSEs included, instead use the `docker-compose.xrootd.yml` file:
+```
+docker-compose -f docker-compose.xrootd.yml build
+docker-compose -f docker-compose.xrootd.yml up
+```
+
 ### Add the OIDC identity to the admin account to finalize OIDC setup
 
 To finalize the OIDC setup, we need to add the local OIDC provider identity to the admin account.
@@ -72,5 +78,54 @@ Inside the started up client container, run:
 
 ```
 rucio-admin -S=userpass --user=${RUCIO_USERPASS_IDENTITY} --password=${RUCIO_USERPASS_PWD} identity add --account root --type OIDC --id "SUB=${RUCIO_SUB_NAME}, ISS=http://localhost:9000" --account=root --email "foo@bar.baz"
+```
+
+# Example
+
+Using the Rucio client, you can test the setup via a file upload and download.
+
+Steps:
+
+1) Login via OIDC on the CLI
+```
+rucio -S=OIDC -a=root whoami
+```
+
+2) Add a new RSE
+```
+rucio-admin rse add XRD1
+```
+
+3) Specify that this new RSE will use the ROOT protocol
+```
+rucio-admin rse add-protocol \
+    --hostname localhost \
+    --scheme root \
+    --prefix '//rucio/' \
+    --port 1094 \
+    --impl rucio.rse.protocols.xrootd.Default \
+    --domain-json '{"wan": {"read": 1, "write": 1, "delete": 1, "third_party_copy": 1}, "lan": {"read": 1, "write": 1, "delete": 1}}' \
+    XRD1
+```
+
+4) Set the file transfer service for this RSE
+```
+rucio-admin rse set-attribute --rse XRD1 --key fts --value localhost:8446
+```
+
+5) Create a Rucio "scope" named "test"
+```
+rucio-admin scope add --account root --scope test
+```
+
+6) Create and upload a test file (`file1`) to this new RSE:
+```
+touch file1
+rucio upload --rse XRD1 --scope test file1
+```
+
+7) Download the file
+```
+rucio download test:file1
 ```
 
