@@ -113,18 +113,23 @@ rucio-admin rse add-protocol \
 rucio-admin rse set-attribute --rse XRD1 --key fts --value localhost:8446
 ```
 
-5) Create a Rucio "scope" named "test"
+5) Set "indefinite" storage quota for root
+```
+rucio-admin account set-limits root XRD1 -1
+```
+
+6) Create a Rucio "scope" named "test"
 ```
 rucio-admin scope add --account root --scope test
 ```
 
-6) Create and upload a test file (`file1`) to this new RSE:
+7) Create and upload a test file (`file1`) to this new RSE:
 ```
 touch file1
 rucio upload --rse XRD1 --scope test file1
 ```
 
-7) Download the file
+8) Download the file
 ```
 rucio download test:file1
 ```
