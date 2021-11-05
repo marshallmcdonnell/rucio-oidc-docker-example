@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+
+  oidc-provider:
+    build: oidc-provider/
+    ports:
+      - "9000:9000"
+    extra_hosts:
+      - "localhost:172.17.0.1"
+
+  rucio-db:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER=rucio
+      - POSTGRES_DB=rucio
+      - POSTGRES_PASSWORD=secret
+    command: ["-c", "fsync=off","-c", "synchronous_commit=off","-c", "full_page_writes=off"]
+
+  rucio:
+    image: rucio/rucio-server:release-${RUCIO_VERSION_SERVER}
+    ports:
+      - "8080:80"
+    volumes:
+        - ./rucio-server/patch:/patch
+        - ./rucio-server/rucio.cfg:/opt/rucio/etc/rucio.cfg
+        - ./rucio-server/idpsecrets.json:/opt/rucio/etc/idpsecrets.json
+    depends_on:
+      - oidc-provider
+    environment:
+      - RUCIO_SERVER_TYPE=all
+      - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
+    extra_hosts:
+      - "localhost:172.17.0.1"
+
+  rucio-ui:
+    build:
+      context: rucio-ui/
+      args:
+        - TAG=${RUCIO_VERSION_UI}
+    ports:
+      - "8443:80"
+    volumes:
+        - ./rucio-server/rucio.cfg:/opt/rucio/etc/rucio.cfg
+        - ./rucio-server/idpsecrets.json:/opt/rucio/etc/idpsecrets.json
+    depends_on:
+      - rucio
+    environment:
+      - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
+      - RUCIO_PROXY_SCHEME=http
+      - RUCIO_PROXY=rucio:8080
+      - RUCIO_AUTH_PROXY_SCHEME=http
+      - RUCIO_AUTH_PROXY=rucio:8080
+    extra_hosts:
+      - "localhost:172.17.0.1"
+
+  xrd1:
+    image: rucio/xrootd-noauth:latest
+    ports:
+      - "1094:1094"
+    environment:
+      - XRDPORT=1094
+
+  fts:
+    image: rucio/fts:latest
+    ports:
+      - "8446:8446"
+      - "8449:8449"
+
+  rucio-db-init:
+    image: rucio/rucio-init:release-${RUCIO_VERSION_DB_INIT}
+    depends_on:
+      - rucio-db
+      - rucio
+    environment:
+      - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_IDENTITY=${RUCIO_USERPASS_IDENTITY}
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_PWD=${RUCIO_USERPASS_PWD}
