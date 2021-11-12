@@ -38,6 +38,7 @@ docker run \
   -e RUCIO_CFG_AUTH_HOST=${RUCIO_CFG_AUTH_HOST} \
   -e RUCIO_CFG_AUTH_TYPE=oidc \
   -e RUCIO_CFG_ACCOUNT=${RUCIO_CFG_ACCOUNT} \
+  -v $(pwd)/test:/test \
   --name=rucio-client \
   -it rucio/rucio-clients:${RUCIO_TAG}
 
