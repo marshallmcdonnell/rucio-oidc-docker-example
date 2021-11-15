@@ -9,14 +9,6 @@ services:
     extra_hosts:
       - "localhost:172.17.0.1"
 
-  rucio-db:
-    image: postgres:11
-    environment:
-      - POSTGRES_USER=rucio
-      - POSTGRES_DB=rucio
-      - POSTGRES_PASSWORD=secret
-    command: ["-c", "fsync=off","-c", "synchronous_commit=off","-c", "full_page_writes=off"]
-
   rucio:
     image: rucio/rucio-server:release-${RUCIO_VERSION_SERVER}
     ports:
@@ -54,6 +46,31 @@ services:
     extra_hosts:
       - "localhost:172.17.0.1"
 
+  rucio-db:
+    image: postgres:11
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rucio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=rucio
+      - POSTGRES_DB=rucio
+      - POSTGRES_PASSWORD=secret
+    command: ["-c", "fsync=off","-c", "synchronous_commit=off","-c", "full_page_writes=off"]
+
+  rucio-db-init:
+    image: rucio/rucio-init:release-${RUCIO_VERSION_DB_INIT}
+    depends_on:
+      rucio-db:
+        condition: service_healthy
+    depends_on:
+      - rucio-db
+    environment:
+      - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_IDENTITY=${RUCIO_USERPASS_IDENTITY}
+      - RUCIO_CFG_BOOTSTRAP_USERPASS_PWD=${RUCIO_USERPASS_PWD}
+
   xrd1:
     image: rucio/xrootd-noauth:latest
     ports:
@@ -67,12 +84,4 @@ services:
       - "8446:8446"
       - "8449:8449"
 
-  rucio-db-init:
-    image: rucio/rucio-init:release-${RUCIO_VERSION_DB_INIT}
-    depends_on:
-      - rucio-db
-      - rucio
-    environment:
-      - RUCIO_CFG_DATABASE_DEFAULT=postgresql://rucio:secret@rucio-db/rucio
-      - RUCIO_CFG_BOOTSTRAP_USERPASS_IDENTITY=${RUCIO_USERPASS_IDENTITY}
-      - RUCIO_CFG_BOOTSTRAP_USERPASS_PWD=${RUCIO_USERPASS_PWD}
+
